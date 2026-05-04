@@ -1,0 +1,56 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Kinetic Pulse (approx) */
+    --background: 0 0% 7%;
+    --foreground: 15 6% 89%;
+
+    --card: 0 2% 12%;
+    --card-foreground: 15 6% 89%;
+
+    --popover: 0 2% 12%;
+    --popover-foreground: 15 6% 89%;
+
+    --primary: 351 100% 66%;
+    --primary-foreground: 343 100% 20%;
+
+    --secondary: 275 100% 68%;
+    --secondary-foreground: 285 60% 18%;
+
+    --muted: 0 0% 18%;
+    --muted-foreground: 0 0% 70%;
+
+    --accent: 178 100% 43%;
+    --accent-foreground: 180 100% 12%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 98%;
+
+    --border: 345 18% 26%;
+    --input: 0 0% 22%;
+    --ring: 351 100% 66%;
+
+    --radius: 0.5rem;
+  }
+
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+@layer components {
+  .glass-card {
+    @apply bg-card/70 backdrop-blur-[12px] border border-white/10;
+  }
+
+  .primary-gradient {
+    @apply bg-gradient-to-r from-pink-500 via-fuchsia-500 to-purple-500;
+  }
+}
