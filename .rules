@@ -1,0 +1,229 @@
+# Reelify — Zed AI Agent Rules
+
+## Project
+Reelify is a Next.js app for automating short-form TikTok content creation and publishing.
+It is currently in MVP/prototype stage using mock data only.
+
+## Stack
+- Next.js 16+ with App Router (use `app/` directory, not `pages/`)
+- TypeScript (strict mode — no `any`, no implicit returns)
+- Tailwind CSS for all styling — no external CSS files, no CSS modules
+- shadcn/ui for all UI components (Button, Card, Badge, Switch, Input, Select, etc.)
+- lucide-react for icons only
+
+## File conventions
+- Named exports only — never `export default function`
+- One component per file
+- All mock data lives in `/lib/mockData.ts` — never inline fake data in components
+- Types live in `/lib/types.ts`
+- Keep components small — extract sub-components if a file exceeds ~120 lines
+
+## Data & API rules
+- NO real API calls — this is a mock-only prototype
+- Never call TikTok, OpenAI, or any external API
+- All state is local (useState / useReducer) — no database, no backend routes yet
+- If you need server actions or API routes, stub them and return mock data
+
+## UI rules
+- Use shadcn/ui components — do not build custom buttons, inputs, or modals from scratch
+- All pages get the shared `<Sidebar />` layout
+- Status values: "active" | "paused" | "draft" — use Badge variants to color them
+- Post formats: "slideshow" | "ugc" — display as a readable label, not raw string
+- Safety modes: "publish" | "draft" — affects the account card badge color
+- refer to @DESIGN.md
+
+## Naming
+- Automation = a configured workflow (niche + account + schedule + prompt settings)
+- Post = a single generated content item tied to an automation
+- Account = a connected TikTok account profile
+
+## Do not
+- Add authentication or login screens (out of scope for MVP)
+- Add real file uploads
+- Use `pages/` router
+- Install new npm packages without asking first
+
+# Zed AI Assistant Rules
+# Philosophy: Low Coupling · High Cohesion · Separation of Concerns
+
+---
+
+## 1. CORE PRINCIPLES
+
+### 1.1 Obey the User First
+- The user's explicit instruction is the highest authority.
+- Never override, reinterpret, or second-guess a clear instruction.
+- If an instruction is ambiguous, ask exactly one clarifying question before proceeding.
+- Never assume missing context — surface it.
+
+### 1.2 Low Coupling
+- Every module, function, or component must be writable, testable, and deletable without touching others.
+- Avoid shared mutable state between modules.
+- Prefer dependency injection over direct imports of concrete implementations.
+- If two pieces of code change together often, they belong together. If not, they must not depend on each other.
+
+### 1.3 High Cohesion
+- A module does one thing and owns that thing completely.
+- Group code by feature/domain, not by type (e.g., `/user/` not `/controllers/`, `/models/`, `/services/` scattered everywhere).
+- A file that has to import from 10 other files is a smell — split the responsibility or find the right layer.
+
+### 1.4 Separation of Concerns
+- UI, business logic, and data access live in distinct layers. They never bleed into each other.
+- Presentational components have zero business logic.
+- Business logic has zero knowledge of UI frameworks.
+- Data access (API calls, DB queries) lives in its own dedicated layer.
+
+---
+
+## 2. CODE GENERATION RULES
+
+### 2.1 Structure Before Code
+- Always outline the intended module boundaries before generating code.
+- Name each layer, its responsibility, and what it is NOT responsible for.
+
+### 2.2 Functions and Modules
+- One function = one responsibility.
+- Max function length: 30 lines. If longer, extract.
+- No side effects in pure logic functions. Label side-effectful functions clearly.
+- Avoid functions that both compute and mutate — split them.
+
+### 2.3 Naming
+- Names must reveal intent, not implementation.
+  - Bad: `handleData()`, `doStuff()`, `processIt()`
+  - Good: `parseUserInput()`, `calculateTotalPrice()`, `fetchOrderById()`
+- Boolean variables/functions: prefix with `is`, `has`, `can`, `should`.
+- Event handlers: prefix with `on` (e.g., `onSubmit`, `onUserLogin`).
+
+### 2.4 Dependencies
+- Depend on abstractions (interfaces, types, contracts), not concretions.
+- No circular dependencies. Ever.
+- External libraries are imported only at the boundary layer — never deep in business logic.
+
+### 2.5 Comments and Documentation
+- Code should be self-documenting first.
+- Comment the *why*, not the *what*.
+- Every public function/module gets a one-line docstring describing its single responsibility.
+
+---
+
+## 3. ARCHITECTURE RULES
+
+### 3.1 Layer Boundaries (applies to any stack)
+```
+[UI / Presentation Layer]
+        ↓  (calls)
+[Application / Use-Case Layer]
+        ↓  (calls)
+[Domain / Business Logic Layer]
+        ↓  (calls)
+[Infrastructure / Data Access Layer]
+```
+- Arrows go DOWN only. Lower layers never import from upper layers.
+- Domain/business logic must be framework-agnostic and pure.
+
+### 3.2 State Management
+- Local state stays local. Only lift state when two or more components truly share it.
+- Global state is a last resort — justify it explicitly before using it.
+- Side effects (async, I/O, subscriptions) are isolated to the infrastructure or application layer.
+
+### 3.3 File and Folder Structure
+- Group by feature/domain, not by file type.
+- Each feature folder owns its own types, logic, UI, and tests.
+- Shared utilities live in a `/shared` or `/common` folder — kept minimal and generic.
+
+Example:
+```
+src/
+  features/
+    auth/
+      auth.types.ts
+      auth.service.ts       ← business logic
+      auth.api.ts           ← data access
+      AuthForm.tsx          ← UI only
+      auth.test.ts
+    orders/
+      ...
+  shared/
+    utils/
+    hooks/
+    types/
+```
+
+---
+
+## 4. EDIT AND REFACTOR RULES
+
+### 4.1 Minimal Footprint
+- Change only what is necessary to fulfill the instruction.
+- Do not refactor unrelated code unless explicitly asked.
+- Do not add abstractions that are not yet needed (YAGNI).
+
+### 4.2 No Surprise Additions
+- Do not add libraries, dependencies, or patterns unless the user requested them or they are required to fulfill the task.
+- If a better approach exists, suggest it — but implement what was asked.
+
+### 4.3 Preserve Intent
+- When editing existing code, preserve the original author's naming and style conventions unless instructed otherwise.
+- Surface breaking changes explicitly before making them.
+
+---
+
+## 5. TESTING RULES
+
+### 5.1 Test What Matters
+- Unit test pure business logic exhaustively.
+- Integration test the boundaries between layers.
+- Do not write tests that test implementation details — test behavior.
+
+### 5.2 Test Isolation
+- Each test is independent and can run in any order.
+- No shared state between tests.
+- Mock only at the boundary (infrastructure layer), not inside business logic.
+
+---
+
+## 6. RESPONSE BEHAVIOR
+
+### 6.1 Be Direct
+- Lead with the answer or the code. Explanation follows, not precedes.
+- Do not pad responses with affirmations ("Great question!", "Sure!", "Absolutely!").
+- Do not restate the user's request back to them.
+
+### 6.2 Surface Trade-offs, Don't Hide Them
+- If a design decision has a meaningful trade-off, state it in one sentence.
+- If there are two valid approaches, present both briefly and recommend one — do not ask which the user prefers unless the choice materially changes scope.
+
+### 6.3 Errors and Blockers
+- If a task cannot be completed as described, say so immediately with the specific reason.
+- Propose the closest valid alternative.
+
+### 6.4 Scope Discipline
+- Complete the requested task fully before suggesting extensions or improvements.
+- Unsolicited feature additions are not permitted.
+
+---
+
+## 7. ANTI-PATTERNS (NEVER DO)
+
+- ❌ God objects / god functions that do everything
+- ❌ Shared mutable global state
+- ❌ Business logic inside UI components
+- ❌ Direct database/API calls inside UI components
+- ❌ Circular imports
+- ❌ Magic strings and magic numbers — use named constants
+- ❌ Deeply nested conditionals — extract to named functions or guard clauses
+- ❌ Commented-out dead code left in the codebase
+- ❌ Catch blocks that silently swallow errors
+- ❌ Overengineering for hypothetical future requirements
+
+---
+
+## 8. QUICK REFERENCE CHECKLIST
+
+Before generating or editing code, confirm:
+- [ ] Does each unit have exactly one reason to change?
+- [ ] Can this module be tested without instantiating the entire app?
+- [ ] Do layers communicate downward only?
+- [ ] Are side effects isolated to the boundary?
+- [ ] Does this follow the user's explicit instruction precisely?
+- [ ] Is anything being added that was not asked for?
